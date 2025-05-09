@@ -1,4 +1,4 @@
-## ===EDA===
+# ===EDA===
 # 油温の最大・最小・平均値
 max = df['OT'].max()
 min = df['OT'].min()
