@@ -1,0 +1,11 @@
+df_hypo2 = df_feat.copy()
+
+# 1年周期（8760時間）のsin/cos
+t = np.arange(len(df_feat))
+df_hypo2['sin_yearly'] = np.sin(2 * np.pi * t / 8760)
+df_hypo2['cos_yearly'] = np.cos(2 * np.pi * t / 8760)
+
+df_horizon = make_24h_horizon(df_hypo2)
+X_train, y_train, X_test, y_test, scaler = split_scale(df_horizon)
+model, best_params, cv_mae = train_best_lgb(X_train, y_train)
+metrics = evaluate(model, X_test, y_test)
