@@ -1,0 +1,91 @@
+TEST_SIZE = 24
+
+def make_24h_horizon(df_feat: pd.DataFrame):
+    df = df_feat.copy()
+    # 24時間先の油温をターゲット変数に設定
+    df["y"] = df["OT"].shift(-24)
+    df = df.dropna()
+    return df
+
+def split_scale(df_feat: pd.DataFrame, test_size:int=TEST_SIZE):
+    """最後の test_size 行をテストに取り、分割後に1回だけスケーリング"""
+    train = df_feat.iloc[:-test_size]
+    test  = df_feat.iloc[-test_size:]
+
+    X_train, y_train = train.drop("y", axis=1), train["y"]
+    X_test , y_test  = test.drop ("y", axis=1), test ["y"]
+
+    # IQRクリップ(訓練データでのみ閾値算出)
+    cols = X_train.columns.difference(['OT']) #季節の影響があるため
+    for col in cols:
+        lower = X_train[col].quantile(0.02)
+        upper = X_train[col].quantile(0.98)
+        X_train[col] = X_train[col].clip(lower=lower, upper=upper)
+        X_test[col]  = X_test[col].clip(lower=lower, upper=upper)
+
+    scaler = StandardScaler()
+    X_train = pd.DataFrame(scaler.fit_transform(X_train), index=X_train.index, columns=X_train.columns)
+    X_test  = pd.DataFrame(scaler.transform(X_test),      index=X_test.index,  columns=X_test.columns)
+
+    return X_train, y_train, X_test, y_test, scaler
+
+
+
+def train_best_lgb(X_train, y_train):
+    study = optuna.create_study(direction="minimize", sampler=optuna.samplers.TPESampler(seed=42))
+    study.optimize(lambda t: objective(t, X_train, y_train), n_trials=20, show_progress_bar=False)
+    best_params = study.best_trial.params
+    random_state = 42
+    best_params.update({
+        "objective":"regression",
+        "metric"   :"l1",
+        "boosting_type":"gbdt",
+        "verbosity":-1,
+        "random_state":random_state,
+    })
+    model = lgb.LGBMRegressor(**best_params, n_estimators=1000)
+    model.fit(X_train, y_train)
+    return model, best_params, study.best_value
+
+def objective(trial, X, y):
+    random_state = 42
+    params = {
+        "objective": "regression",
+        "metric"   : "l1",
+        "learning_rate" : trial.suggest_float("lr", 1e-3, 0.15),
+        "num_leaves"    : trial.suggest_int("num_leaves", 16, 128),
+        "max_depth"     : trial.suggest_int("max_depth", 3, 15),
+        "feature_fraction": trial.suggest_float("feature_fraction", 0.4, 0.9),
+        "bagging_fraction": trial.suggest_float("bagging_fraction", 0.6, 1.0),
+        "bagging_freq"    : trial.suggest_int("bagging_freq", 1, 7),
+        "min_child_samples": trial.suggest_int("min_child_samples", 10, 100),
+        "lambda_l1": trial.suggest_float("lambda_l1", 0.0, 1.0),
+        "lambda_l2": trial.suggest_float("lambda_l2", 0.0, 2.0),
+    }
+    tscv = TimeSeriesSplit(n_splits=4)
+    maes = []
+    for train_idx, val_idx in tscv.split(X):
+        X_tr, X_val = X.iloc[train_idx], X.iloc[val_idx]
+        y_tr, y_val = y.iloc[train_idx], y.iloc[val_idx]
+        dtrain = lgb.Dataset(X_tr, y_tr)
+        dvalid = lgb.Dataset(X_val, y_val, reference=dtrain)
+        model = lgb.train(
+            params,
+            dtrain,
+            num_boost_round=500,
+            valid_sets=[dvalid],
+        )
+        preds = model.predict(X_val, num_iteration=model.best_iteration)
+        maes.append(mean_absolute_error(y_val, preds))
+    return np.mean(maes)
+
+def evaluate(model, X_test, y_test):
+    preds = model.predict(X_test)
+    mae  = mean_absolute_error(y_test, preds)
+    max_error = np.max(np.abs(y_test - preds))
+
+    print("\n=== 評価指標 ===")
+    print(f"MAE : {mae:.4f}")
+    print(f"MAX_ERROR: {max_error:.4f}")
+
+    return {"MAE":mae, "MAX_ERROR":max_error}
