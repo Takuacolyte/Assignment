@@ -10,3 +10,19 @@ df_horizon = make_24h_horizon(df_feat)
 X_train, y_train, X_test, y_test, scaler = split_scale(df_horizon)
 model, best_params, cv_mae = train_best_lgb(X_train, y_train)
 metrics = evaluate(model, X_test, y_test)
+
+#各特徴量の寄与度の確認
+importances = pd.Series(
+    model.feature_importances_,
+    index=X_train.columns
+).sort_values(ascending=False)
+
+df_imp = importances.reset_index().rename(columns={'index': 'feature', 0: 'importance'})
+importances = importances[:20]
+plt.figure(figsize=(10, 6))
+importances.plot(kind='bar')   # デフォルトの色で描画
+plt.title("Feature Importances")
+plt.xlabel("Feature")
+plt.ylabel("Importance")
+plt.tight_layout()
+plt.show()
