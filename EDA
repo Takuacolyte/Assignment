@@ -1,0 +1,118 @@
+## ===EDA===
+# 油温の最大・最小・平均値
+max = df['OT'].max()
+min = df['OT'].min()
+avg = df['OT'].mean()
+print(f'Oil temperature max:{max}, min:{min}, avg:{avg}')
+#plot
+plt.figure(figsize=(10, 4))
+df['OT'].plot()
+plt.xlabel('Date')
+plt.ylabel('temperature')
+plt.title('time_series of oil temperature')
+plt.tight_layout()
+plt.show()
+
+def computation_and_plot(df, col, label):
+    print(f'{label}の最大・最小・平均値')
+    max_val = df[col].max()
+    min_val = df[col].min()
+    avg_val = df[col].mean()
+    print(f'max: {max_val}, min: {min_val}, avg: {avg_val}')
+    print('')
+
+    # 可視化
+    df[col].plot.hist(bins=100, title=f'{label} variance')
+    plt.show()
+    fig, ax = plt.subplots(figsize=(10, 4))
+    df[col].plot(ax=ax)
+    ax.set(title=f'time_series of {label}', xlabel='Date', ylabel='loading')
+    plt.tight_layout()
+    plt.show()
+
+# 対象カラム
+loads = [
+    ('HUFL', 'High useful load'),
+    ('HULL', 'High useless load'),
+    ('MUFL', 'Middle useful load'),
+    ('MULL', 'Middle useless load'),
+    ('LUFL', 'Low useful load'),
+    ('LULL', 'Low useless load'),
+]
+
+# 再帰処理
+for col, label in loads:
+    computation_and_plot(df, col, label)
+
+    correlations = df.corr()['OT'].drop('OT')
+
+# 相関関係の可視化
+plt.figure(figsize=(8, 5))
+sns.barplot(x=correlations.index, y=correlations.values)
+plt.title('Correlation between OT and Load Features')
+plt.ylabel('Correlation coefficient')
+plt.xlabel('Features')
+plt.show()
+
+# ヒートマップ
+cols = df.columns
+corr = df[cols].astype(float).corr()
+plt.figure(figsize=(8, 5))
+sns.heatmap(
+    corr,
+    annot=True,
+    cmap='coolwarm', # カラーマップ（赤：正相関, 青：負相関）
+    vmin=-1, vmax=1,
+    square=True
+)
+plt.title("Correlation matrix of load features")
+plt.tight_layout()
+plt.show()
+
+# STL分解
+columns = df.columns
+for col in columns:
+    series = df[col].dropna()
+    stl = STL(df[col], period=24)
+    plt.figure(figsize=(10,6))
+    result = stl.fit()
+    result.plot()
+    plt.show()
+
+# 定常性の確認(adf検定, kpss検定)
+def adf_test(data, sig_level = 0.05, do_print=True) -> bool:
+    """
+    ADF検定を実施する関数
+    Args:
+        data: 検定対象の系列データ
+        sig_level: 有意水準
+        do_print: 検定結果をprintするかどうか
+    Returns:
+        bool: Trueの場合定常,Falseの場合非定常を表す
+    """
+    dftest = adfuller(data)
+    dfoutput = pd.Series(dftest[0:4], index=['Test Statistic','p-value','#Lags Used','Number of Observations Used'])
+    is_stationary = dfoutput['p-value'] < sig_level
+    return {
+        'p-value': dfoutput['p-value'],
+    }
+    
+#カラムの指定
+columns = df.columns
+
+for col in columns:
+    series = df[col].dropna()
+    result = adf_test(series)
+    p_value = result['p-value']
+
+    print(f"{col:}  p={p_value}  "
+          f"{'定常' if p_value < 0.05 else '非定常'}")
+
+#kpss検定
+for col in columns:
+    series = df[col].dropna()
+    kpss_stat, kpss_p, *_ = kpss(series, regression='ct')
+    if kpss_p > 0.05:
+       print(f'定常 {col}: KPSS p={kpss_p}')
+    else:
+       print(f'非定常 {col}: KPSS p={kpss_p}')
