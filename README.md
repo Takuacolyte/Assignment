@@ -20,11 +20,12 @@ Transformer Oil‑Temperature Forecasting with LightGBM
 ---
 
 ## 🗂️ ディレクトリ構成
-athena-assignment/
+❯ tree -a -I "node_modules|.next|.git|.pytest_cache|static" -L 2
+.
 ├── src/ # モデル・前処理スクリプト
 │ ├── data_loader.py
 │ ├── feature_engineering.py
-│ ├── train.py # LightGBM 学習 & Optuna HPO
+│ ├── train.py # LightGBM 学習 & ハイパーパラメーター探索
 │ └── predict.py # 24h 先予測
 ├── data/
 │ └── ett_small.csv # ETT-small などを配置
