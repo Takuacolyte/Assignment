@@ -1,0 +1,12 @@
+# 欠損値処理
+df_feat.replace([np.inf, -np.inf], np.nan, inplace=True)
+df_feat.dropna(inplace=True)
+# 確認
+null_counts = df_feat.isnull().sum()
+null_counts = null_counts[null_counts > 0]
+print(null_counts)
+
+df_horizon = make_24h_horizon(df_feat)
+X_train, y_train, X_test, y_test, scaler = split_scale(df_horizon)
+model, best_params, cv_mae = train_best_lgb(X_train, y_train)
+metrics = evaluate(model, X_test, y_test)
