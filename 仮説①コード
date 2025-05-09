@@ -1,0 +1,42 @@
+#仮説1 LULL/LUFL/OTの寄与が高い→特徴量追加
+df_hypo = df_feat.copy()
+df_hypo['LUFL_LULL_ratio'] = df_hypo["LUFL"] / (df_hypo["LUFL"] + df_hypo["LULL"] + 1)
+df_hypo['sum_low_load'] = df_hypo["LUFL"] + df_hypo["LULL"]
+df_hypo['LULL_OT_inter']  = df_hypo['LULL'] * df_hypo['OT']
+df_hypo['LUFL_OT_inter']  = df_hypo['LUFL'] * df_hypo['OT']
+
+#欠損値処理
+columns = df_hypo.columns
+non_stationary_cols = []
+
+# 非定常カラムの特定
+for col in columns:
+    series = df_hypo[col]
+    kpss_stat, kpss_p, *_ = kpss(series, regression='ct')
+    if kpss_p > 0.05:
+        print(f'定常 {col}: KPSS p={kpss_p}')
+    else:
+        print(f'非定常 {col}: KPSS p={kpss_p}')
+        non_stationary_cols.append(col)
+
+# 非定常カラムのみ差分を取る
+for col in non_stationary_cols:
+    df_hypo[col] = df_hypo[col].diff()
+
+df_hypo = df_hypo.dropna()
+
+# 定常性再確認
+columns = df_hypo.columns
+for col in columns:
+    series = df_hypo[col]
+    series = series.replace([np.inf, -np.inf], np.nan).dropna()
+    kpss_stat, kpss_p, *_ = kpss(series, regression='ct')
+    if kpss_p > 0.05:
+       print(f'定常 {col}: KPSS p={kpss_p}')
+    else:
+       print(f'非定常 {col}: KPSS p={kpss_p}')
+
+df_horizon = make_24h_horizon(df_hypo)
+X_train, y_train, X_test, y_test, scaler = split_scale(df_horizon)
+model, best_params, cv_mae = train_best_lgb(X_train, y_train)
+metrics = evaluate(model, X_test, y_test)
