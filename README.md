@@ -7,9 +7,10 @@ Transformer Oil‑Temperature Forecasting with LightGBM
 設備劣化と電力消費を同時に抑えることを目的としとしたプロジェクトです。
 
 ## ディレクトリ構成
-├── src/                      ← メインのコード
-│   ├── __init__.py
-│   ├── data_loader.py        ← データ読み込み・前処理
-│   ├── feature_engineering.py← 特徴量生成
-│   ├── model.py              ← モデル構築・学習
-│   ├── train.py              ← 学習実行スクリプト
+├── src/
+│   ├── __init__.py            ← パッケージ化のための特別ファイル（空でもOK）
+│   ├── data_loader.py
+│   ├── feature_engineering.py
+│   ├── model.py
+│   ├── train.py
+
