@@ -19,7 +19,7 @@ Transformer Oil‑Temperature Forecasting with LightGBM
 
 ---
 
-## 🗂️ ディレクトリ構成（例）
+## 🗂️ ディレクトリ構成
 athena-assignment/
 ├── src/ # モデル・前処理スクリプト
 │ ├── data_loader.py
