@@ -15,7 +15,7 @@ def split_scale(df_feat: pd.DataFrame, test_size:int=TEST_SIZE):
     X_train, y_train = train.drop("y", axis=1), train["y"]
     X_test , y_test  = test.drop ("y", axis=1), test ["y"]
 
-    return X_train, y_train, X_test, y_test, scaler
+    return X_train, y_train, X_test, y_test
 
 def train_best_lgb(X_train, y_train):
     study = optuna.create_study(direction="minimize", sampler=optuna.samplers.TPESampler(seed=42))
