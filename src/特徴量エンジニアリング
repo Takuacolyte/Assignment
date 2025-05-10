@@ -39,3 +39,34 @@ df_feat['cos_24h'] = np.cos(2 * np.pi * df_feat.index.hour / 24)
 
 # 欠損値処理
 columns = df_feat.columns
+
+#定常性確認(特徴量エンジニアリング後)
+columns = df_feat.columns.difference(['OT','sin_24h','cos_24h'])
+non_stationary_cols = []
+
+# 非定常カラムの特定
+for col in columns:
+    series = df_feat[col]
+    series = series.dropna()
+    kpss_stat, kpss_p, *_ = kpss(series, regression='ct')
+    if kpss_p > 0.05:
+        print(f'定常 {col}: KPSS p={kpss_p}')
+    else:
+        print(f'非定常 {col}: KPSS p={kpss_p}')
+        non_stationary_cols.append(col)
+
+# 非定常カラムのみ差分を取る
+for col in non_stationary_cols:
+    df_feat[col] = df_feat[col].diff()
+
+df_feat = df_feat.dropna()
+
+# 定常性再確認
+for col in columns:
+    series = df_feat[col]
+    series = series.dropna()
+    kpss_stat, kpss_p, *_ = kpss(series, regression='ct')
+    if kpss_p > 0.05:
+       print(f'定常 {col}: KPSS p={kpss_p}')
+    else:
+       print(f'非定常 {col}: KPSS p={kpss_p}')
