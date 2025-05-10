@@ -59,7 +59,7 @@ importances = pd.Series(
 df_imp = importances.reset_index().rename(columns={'index': 'feature', 0: 'importance'})
 importances = importances[:50]
 plt.figure(figsize=(10, 6))
-importances.plot(kind='bar')   # デフォルトの色で描画
+importances.plot(kind='bar')
 plt.title("Feature Importances")
 plt.xlabel("Feature")
 plt.ylabel("Importance")
@@ -68,4 +68,3 @@ plt.show()
 
 plot_importance(model,max_num_features=15, height=0.5, figsize=(10, 8))  # 上位20個のみ表示
 plt.show()
-
