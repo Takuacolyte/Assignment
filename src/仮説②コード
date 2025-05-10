@@ -3,10 +3,49 @@ df_hypo2 = df_feat.copy()
 
 # 1年周期（8760時間）のsin/cos
 t = np.arange(len(df_feat))
-df_hypo2['sin_yearly'] = np.sin(2 * np.pi * t / 8760)
-df_hypo2['cos_yearly'] = np.cos(2 * np.pi * t / 8760)
+sin_yearly = np.sin(2 * np.pi * t / 8760)
+cos_yearly = np.cos(2 * np.pi * t / 8760)
+df_hypo2['OT_sin_yearly'] = df_hypo2['OT'] * sin_yearly
+df_hypo2['OT_cos_yearly'] = df_hypo2['OT'] * cos_yearly
+
+#欠損値処理
+columns = df_hypo2.columns.difference(['OT','sin_24h','cos_24h'])
+non_stationary_cols = []
+
+# 非定常カラムの特定
+for col in columns:
+    series = df_hypo2[col]
+    kpss_stat, kpss_p, *_ = kpss(series, regression='ct')
+    if kpss_p > 0.05:
+        print(f'定常 {col}: KPSS p={kpss_p}')
+    else:
+        print(f'非定常 {col}: KPSS p={kpss_p}')
+        non_stationary_cols.append(col)
+
+# 非定常カラムのみ差分を取る
+for col in non_stationary_cols:
+    df_hypo2[col] = df_hypo2[col].diff()
+
+df_hypo2 = df_hypo2.dropna()
 
 df_horizon = make_24h_horizon(df_hypo2)
 X_train, y_train, X_test, y_test, scaler = split_scale(df_horizon)
 model, best_params, cv_mae = train_best_lgb(X_train, y_train)
 metrics = evaluate(model, X_test, y_test)
+
+# 特徴量重要度の取得
+importances = pd.Series(
+    model.feature_importances_,
+    index=X_train.columns
+).sort_values(ascending=False)
+
+# 結果のプロット
+df_imp = importances.reset_index().rename(columns={'index': 'feature', 0: 'importance'})
+print(df_imp.head(50))
+plt.figure(figsize=(10, 6))
+importances.plot(kind='bar')
+plt.title("Feature Importances")
+plt.xlabel("Feature")
+plt.ylabel("Importance")
+plt.tight_layout()
+plt.show()
