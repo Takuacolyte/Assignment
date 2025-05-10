@@ -37,5 +37,34 @@ for col in columns:
 X_train, y_train, X_test, y_test, scaler = split_scale(df_horizon)
 model, best_params, cv_mae = train_best_lgb(X_train, y_train)
 metrics = evaluate(model, X_test, y_test)
-       print(f'非定常 {col}: KPSS p={kpss_p}')
+
+# テスト予測
+y_pred = model.predict(X_test, num_iteration=model.best_iteration_)
+y_true = y_test  # テスト区間の実測値
+y_pred = pd.Series(y_pred, index=y_test.index)
+
+# 実測値と予測値のプロット
+plt.figure(figsize=(10, 5))
+plt.plot(y_true, label='original')
+plt.plot(y_pred, '--', label='predict')
+plt.legend()
+plt.show()
+#各特徴量の寄与度の確認
+importances = pd.Series(
+    model.feature_importances_,
+    index=X_train.columns
+).sort_values(ascending=False)
+
+df_imp = importances.reset_index().rename(columns={'index': 'feature', 0: 'importance'})
+importances = importances[:50]
+plt.figure(figsize=(10, 6))
+importances.plot(kind='bar')   # デフォルトの色で描画
+plt.title("Feature Importances")
+plt.xlabel("Feature")
+plt.ylabel("Importance")
+plt.tight_layout()
+plt.show()
+
+plot_importance(model,max_num_features=15, height=0.5, figsize=(10, 8))  # 上位20個のみ表示
+plt.show()
 
