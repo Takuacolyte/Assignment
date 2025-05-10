@@ -10,5 +10,5 @@
 4. [特徴量エンジニアリング](https://github.com/Takuacolyte/Assignment/edit/main/src/特徴量エンジニアリング) — 特徴量生成・加工処理
 5. [モデル構築・学習](https://github.com/Takuacolyte/Assignment/edit/main/src/モデル構築・学習) — モデルの設計と学習処理
 6. [学習実行・結果の確認](https://github.com/Takuacolyte/Assignment/edit/main/src/学習実行・結果の確認) — 学習の実行・特徴量寄与度/実測値と予測値の誤差確認
-7. [仮説①コード](https://github.com/Takuacolyte/Assignment/edit/main/src/仮説①コード) — 仮説①に基づく実験コード
-8. [仮説②コード](https://github.com/Takuacolyte/Assignment/edit/main/src/仮説②コード) — 仮説②に基づく実験コード
+7. [仮説①コード](https://github.com/Takuacolyte/Assignment/edit/main/src/仮説①コード) — 仮説①に基づいたコード
+8. [仮説②コード](https://github.com/Takuacolyte/Assignment/edit/main/src/仮説②コード) — 仮説②に基づいたコード
