@@ -34,7 +34,7 @@ for col in columns:
        print(f'定常 {col}: KPSS p={kpss_p}')
     else:df_horizon = make_24h_horizon(df_hypo)
 
-X_train, y_train, X_test, y_test, scaler = split_scale(df_horizon)
+X_train, y_train, X_test, y_test = split_scale(df_horizon)
 model, best_params, cv_mae = train_best_lgb(X_train, y_train)
 metrics = evaluate(model, X_test, y_test)
 
