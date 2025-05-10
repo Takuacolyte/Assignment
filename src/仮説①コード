@@ -49,6 +49,7 @@ plt.plot(y_true, label='original')
 plt.plot(y_pred, '--', label='predict')
 plt.legend()
 plt.show()
+
 #各特徴量の寄与度の確認
 importances = pd.Series(
     model.feature_importances_,
