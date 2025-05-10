@@ -4,7 +4,7 @@
 設備劣化と電力消費を同時に抑えることを目的としとしたプロジェクトです。
 
 ## 📂 ファイル構成と説明
-1. [url=https://github.com/Takuacolyte/Assignment/edit/main/src/モジュールのインポート]モジュールのインポート[/url]
+1. [モジュールのインポート](https://github.com/Takuacolyte/Assignment/edit/main/src/モジュールのインポート) — 使用ライブラリのインポート定義
 2. データの読み込み & indexの処理 — データ読み込み・インデックス処理
 3. EDA — データの探索的解析
 4. 特徴量エンジニアリング — 特徴量生成・加工処理
