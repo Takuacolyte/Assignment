@@ -1,11 +1,11 @@
-#仮説1 LULL/LUFL/OTの寄与が高い→特徴量追加
+# 仮説①:予測への寄与が高かったOT, LULL, LUFLから更なる特徴量を生成していくことでより精度が高まるのでは?
 df_hypo = df_feat.copy()
 df_hypo['LUFL_LULL_ratio'] = df_hypo["LUFL"] / (df_hypo["LUFL"] + df_hypo["LULL"] + 1)
 df_hypo['sum_low_load'] = df_hypo["LUFL"] + df_hypo["LULL"]
 df_hypo['LULL_OT_inter']  = df_hypo['LULL'] * df_hypo['OT']
 df_hypo['LUFL_OT_inter']  = df_hypo['LUFL'] * df_hypo['OT']
 
-#欠損値処理
+# 欠損値処理
 columns = df_hypo.columns
 non_stationary_cols = []
 
