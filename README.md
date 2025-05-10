@@ -5,7 +5,7 @@
 
 ## 📂 ファイル構成と説明
 1. [モジュールのインポート](https://github.com/Takuacolyte/Assignment/edit/main/src/モジュールのインポート) — 使用ライブラリのインポート定義
-2. [データの読み込み & indexの処理](https://github.com/Takuacolyte/Assignment/edit/main/src/データの読み込み&indexの処理) — データ読み込み・インデックス処理
+2. [データの読み込み&indexの処理](https://github.com/Takuacolyte/Assignment/edit/main/src/データの読み込み&indexの処理) — データ読み込み・インデックス処理
 3. [EDA](https://github.com/Takuacolyte/Assignment/edit/main/src/EDA) — データの探索的解析
 4. [特徴量エンジニアリング](https://github.com/Takuacolyte/Assignment/edit/main/src/特徴量エンジニアリング) — 特徴量生成・加工処理
 5. [モデル構築・学習](https://github.com/Takuacolyte/Assignment/edit/main/src/モデル構築・学習) — モデルの設計と学習処理
