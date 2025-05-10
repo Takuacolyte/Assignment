@@ -1,4 +1,4 @@
-# 仮説①:予測への寄与が高かったOT, LULL, LUFLから更なる特徴量を生成していくことでより精度が高まるのでは?
+# 仮説1:予測への寄与が高かったOT, LULL, LUFLから更なる特徴量を生成していくことでより精度が高まるのでは?
 df_hypo = df_feat.copy()
 df_hypo['LUFL_LULL_ratio'] = df_hypo["LUFL"] / (df_hypo["LUFL"] + df_hypo["LULL"] + 1)
 df_hypo['sum_low_load'] = df_hypo["LUFL"] + df_hypo["LULL"]
