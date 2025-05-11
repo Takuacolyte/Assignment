@@ -21,6 +21,7 @@ for window in windows:
         roll = df_feat[col].rolling(window=window, closed='left')
         df_feat[f'{col}_roll_mean_{window}'] = roll.mean()
         df_feat[f'{col}_roll_std_{window}']  = roll.std()
+
 # 指数平滑
 spans = [24, 168]
 for span in spans:
@@ -42,11 +43,14 @@ columns = df_feat.columns
 
 #定常性確認(特徴量エンジニアリング後)
 columns = df_feat.columns.difference(['OT','sin_24h','cos_24h'])
+TEST_SIZE = 24
+train_df = df_feat.iloc[:-TEST_SIZE] # 検証データの隔離
 non_stationary_cols = []
+
 
 # 非定常カラムの特定
 for col in columns:
-    series = df_feat[col]
+    series = train_df[col]
     series = series.dropna()
     kpss_stat, kpss_p, *_ = kpss(series, regression='ct')
     if kpss_p > 0.05:
