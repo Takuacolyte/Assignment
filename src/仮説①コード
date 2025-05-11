@@ -6,11 +6,13 @@ df_hypo['LUFL_OT_inter']  = df_hypo['LUFL'] * df_hypo['OT']
 
 #欠損値処理
 columns = df_hypo.columns.difference(['OT','sin_24h','cos_24h'])
+TEST_SIZE = 24
+train_df = df_hypo.iloc[:-TEST_SIZE] # 検証データの隔離
 non_stationary_cols = []
 
 # 非定常カラムの特定
 for col in columns:
-    series = df_hypo[col]
+    series = train_df[col]
     kpss_stat, kpss_p, *_ = kpss(series, regression='ct')
     if kpss_p > 0.05:
         print(f'定常 {col}: KPSS p={kpss_p}')
